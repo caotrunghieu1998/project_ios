@@ -17,6 +17,7 @@
 		3E1439B028210CE40005840F /* StructDataCallBackApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1439AF28210CE40005840F /* StructDataCallBackApi.swift */; };
 		3E3E613F2826490100268A2F /* MainController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3E613E2826490100268A2F /* MainController.swift */; };
 		3E4937DC28202201005593F3 /* CallAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4937DB28202201005593F3 /* CallAPI.swift */; };
+		3E7F88E92838C96E00F9749B /* ForgetPasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7F88E82838C96E00F9749B /* ForgetPasswordController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		3E1439AF28210CE40005840F /* StructDataCallBackApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StructDataCallBackApi.swift; sourceTree = "<group>"; };
 		3E3E613E2826490100268A2F /* MainController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainController.swift; sourceTree = "<group>"; };
 		3E4937DB28202201005593F3 /* CallAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallAPI.swift; sourceTree = "<group>"; };
+		3E7F88E82838C96E00F9749B /* ForgetPasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgetPasswordController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 			children = (
 				3E0002392812D6ED005351AA /* LoginscreenController.swift */,
 				3E3E613E2826490100268A2F /* MainController.swift */,
+				3E7F88E82838C96E00F9749B /* ForgetPasswordController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -180,6 +183,7 @@
 				3E068783281FF3910016963F /* Validation.swift in Sources */,
 				3E1439B028210CE40005840F /* StructDataCallBackApi.swift in Sources */,
 				3E0002382812D6ED005351AA /* SceneDelegate.swift in Sources */,
+				3E7F88E92838C96E00F9749B /* ForgetPasswordController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

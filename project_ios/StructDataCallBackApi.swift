@@ -14,3 +14,11 @@ struct DataCallBackUserLogin {
     let error:String?
     let system_error:String?
 }
+
+struct DataCallBackDataIsMessage {
+    let isSuccess:Bool
+    let message:String?
+    let error:String?
+    let system_error:String?
+}
+

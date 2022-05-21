@@ -18,10 +18,11 @@ class LoginscreenController: UIViewController,UITextFieldDelegate {
     @IBOutlet weak var imageLogo: UIImageView!
     @IBOutlet weak var btnLogin: UIButton!
     
+    // Khai báo những đối tượng và biến cần dùng
     private let validation = Validation()
     private let callApi = CallAPI()
     private var isShowPassword:Bool = true
-    public var token:String?
+    public var token:String = ""
     private var isLoginSuccess:Bool = false
     
     override func viewDidLoad() {
@@ -44,7 +45,7 @@ class LoginscreenController: UIViewController,UITextFieldDelegate {
                 let resultLogin = self.callApi.CallApiUserLogin(email: email, password: password)
                 if resultLogin.isSuccess, let userName = resultLogin.userName, let token = resultLogin.token{
                     // Login success here
-                    //self.isLoginSuccess = true
+                    self.isLoginSuccess = true
                     self.token = token
                     self.showMessage(message: "Login Success, Hi \"\(userName)\"", textColor: .green, timeDisplay: 5)
                     
@@ -70,6 +71,7 @@ class LoginscreenController: UIViewController,UITextFieldDelegate {
     
     // Kiểm tra xem màn hình chuyển được chưa
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        print(self.isLoginSuccess)
         if let btnSender = sender as? UIButton{
             if btnSender === btnLogin {
                 return self.isLoginSuccess
