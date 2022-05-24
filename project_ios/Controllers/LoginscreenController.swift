@@ -33,6 +33,10 @@ class LoginscreenController: UIViewController,UITextFieldDelegate {
         // Uỷ quyền cho txt
         txtEmail.delegate = self
         txtPassword.delegate = self
+        
+        //Test
+        txtEmail.text = "admin@gmail.com"
+        txtPassword.text = "123456"
     }
     
     //MARK: Custome function
@@ -71,7 +75,6 @@ class LoginscreenController: UIViewController,UITextFieldDelegate {
     
     // Kiểm tra xem màn hình chuyển được chưa
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        print(self.isLoginSuccess)
         if let btnSender = sender as? UIButton{
             if btnSender === btnLogin {
                 return self.isLoginSuccess

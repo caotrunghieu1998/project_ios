@@ -28,4 +28,9 @@ class Validation{
     public func checkPassword(password: String) -> Bool {
         return password.count >= self.passwordLength
     }
+    
+    // Check User Name
+    public func checkUserName(userName: String)->Bool{
+        return (userName.count >= 2 && userName.count <= 100)
+    }
 }

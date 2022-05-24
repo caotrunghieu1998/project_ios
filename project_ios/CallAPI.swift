@@ -115,7 +115,7 @@ class CallAPI{
         return result
     }
     
-    // Send Code reset pasword to email
+    // reset password
     func CallApiUserResetPassword(
         email:String,
         code:String, new_password:String,
@@ -163,6 +163,194 @@ class CallAPI{
                     }
                 } catch {
                     result = DataCallBackDataIsMessage(isSuccess: false, message: nil, error: "Some thing wrong when reset password.", system_error: nil)
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // Get profile
+    func CallApiGetUserProfile(token:String)->UserModel {
+        let Url = String(format: self.urlBackEnd + "/api/user/profile")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service not found")
+            return UserModel(id: -1, name: "", email: "", phone: "", type: "", isConfirm: false, isActive: false)
+        }
+        
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "GET"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        var result:UserModel = UserModel(id: -1, name: "", email: "", phone: "", type: "", isConfirm: false, isActive: false)
+        let session = URLSession.shared
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    if let isSuccess = value["isSuccess"],
+                       let _data = value["data"]{
+                        let _isSuccess = isSuccess as? Int == 1
+                        if _isSuccess,
+                           let id = _data["id"],
+                           let name = _data["name"],
+                           let email = _data["email"],
+                           let phone = _data["phone"],
+                           let type_id = _data["type_id"],
+                           let is_confirm = _data["is_confirm"],
+                           let is_active = _data["is_active"]
+                        {
+                            // Processing User Type
+                            let userTypeId = type_id as! Int
+                            var type = ""
+                            if userTypeId == 1 {
+                                type = "Admin"
+                            } else if userTypeId == 2 {
+                                type = "Manager"
+                            }else{
+                                type = "Staff"
+                            }
+                            result = UserModel(id: id as! Int, name: (name as? String)!, email: email as! String, phone: phone as! String, type: type, isConfirm: is_confirm as? Int == 1, isActive: is_active as? Int == 1)
+                        }
+                    }
+                } catch {
+                    print("error")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // Logout
+    func CallApiUserLogout(token:String) {
+        let Url = String(format: self.urlBackEnd + "/api/user/logout")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service logout not found")
+            return
+        }
+        
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "POST"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    _ = try JSONSerialization.jsonObject(with: data, options: [])
+                } catch {
+                    print("ERROR WHEN LOGOUT")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+    }
+    
+    // Change User Name
+    func CallApiChangeUserName(token:String,newName:String)->Bool {
+        let Url = String(format: self.urlBackEnd + "/api/user/change-name")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service change user name not found")
+            return false
+        }
+        
+        let parameters: [String: Any] = [
+            "name": newName
+        ]
+        
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "POST"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {
+            return false
+        }
+        request.httpBody = httpBody
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        var result = false
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    if let isSuccess = value["isSuccess"]{
+                        result = isSuccess as? Int == 1
+                    }
+                } catch {
+                    print("error when change user name")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // Change User Password
+    func CallApiChangeUserPassword(
+        token:String,
+        oldPassword:String,
+        newPassword:String,
+        confirmPassword:String
+    )->Bool {
+        let Url = String(format: self.urlBackEnd + "/api/user/change-password")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service change user password not found")
+            return false
+        }
+        
+        let parameters: [String: Any] = [
+            "old_password": oldPassword,
+            "new_password": newPassword,
+            "confirm_new_password": confirmPassword
+        ]
+        
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "POST"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {
+            return false
+        }
+        request.httpBody = httpBody
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        var result = false
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    print(value)
+                    if let isSuccess = value["isSuccess"]{
+                        result = isSuccess as? Int == 1
+                    }
+                } catch {
+                    print("error when change user password")
                 }
                 semaphore.signal()
             }
