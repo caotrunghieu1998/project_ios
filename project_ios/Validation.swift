@@ -33,4 +33,29 @@ class Validation{
     public func checkUserName(userName: String)->Bool{
         return (userName.count >= 2 && userName.count <= 100)
     }
+    
+    // Check User phone
+    public func checkUserPhone(phone: String)->Bool{
+        if phone.count != 10{
+            return false
+        }
+        if phone.first != "0"{
+            return false
+        }
+        return true
+    }
+    // check user type
+    public func checkUserType(type:String)->Int{
+        let typeCheck = type.uppercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        switch typeCheck {
+        case "ADMIN":
+            return 1
+        case "MANAGER":
+            return 2
+        case "STAFF":
+            return 3
+        default:
+            return -1
+        }
+    }
 }

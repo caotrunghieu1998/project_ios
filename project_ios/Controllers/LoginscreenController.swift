@@ -33,10 +33,6 @@ class LoginscreenController: UIViewController,UITextFieldDelegate {
         // Uỷ quyền cho txt
         txtEmail.delegate = self
         txtPassword.delegate = self
-        
-        //Test
-        txtEmail.text = "admin@gmail.com"
-        txtPassword.text = "123456"
     }
     
     //MARK: Custome function
@@ -51,17 +47,17 @@ class LoginscreenController: UIViewController,UITextFieldDelegate {
                     // Login success here
                     self.isLoginSuccess = true
                     self.token = token
-                    self.showMessage(message: "Login Success, Hi \"\(userName)\"", textColor: .green, timeDisplay: 5)
+                    self.showMessage(message: "Login Success, Hi \"\(userName)\"", textColor: .green, timeDisplay: 10)
                     
                 }else if !resultLogin.isSuccess, let error = resultLogin.error{
                     // Login False here
-                    self.showMessage(message: error, textColor: .red, timeDisplay: 5.0)
+                    self.showMessage(message: error, textColor: .red, timeDisplay: 10.0)
                     if let system_error = resultLogin.error{
                         print(system_error)
                     }
                 }
             }else{
-                self.showMessage(message: "Wrong at Email or password", textColor: .red, timeDisplay: 5.0)
+                self.showMessage(message: "Wrong at Email or password", textColor: .red, timeDisplay: 10.0)
             }
         }
     }

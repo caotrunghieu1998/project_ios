@@ -5,6 +5,9 @@
 //  Created by Cao Trung Hieu on 02/05/2022.
 //
 import UIKit
+import Foundation
+import os.log
+
 class CallAPI{
     // Fields
     private let urlBackEnd:String = "https://backend-project-ios.000webhostapp.com"
@@ -345,12 +348,445 @@ class CallAPI{
                 do {
                     let json = try JSONSerialization.jsonObject(with: data, options: [])
                     let value = json as! Dictionary<String, AnyObject>
-                    print(value)
                     if let isSuccess = value["isSuccess"]{
                         result = isSuccess as? Int == 1
                     }
                 } catch {
                     print("error when change user password")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    
+    // Get product list
+    func CallApiGetProductList(
+        token:String,
+        screen:String,
+        keyword:String
+    )->[ProductModel] {
+        let Url = String(format: self.urlBackEnd + "/api/product/list-product?screen=\(screen)&keyword=\(keyword)")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service get list product not found")
+            return []
+        }
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "GET"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        var result:[ProductModel] = []
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    if let _data = value["data"]{
+                        for item in _data as! [Dictionary<String,Any>]{
+                            if let id = item["id"],
+                               let image = item["image"],
+                               let name = item["name"],
+                               let price = item["price"],
+                               let quantity = item["quantity"],
+                               let type = item["type"],
+                               let unit = item["unit"],
+                               let isActive = item["isActive"]{
+                                //Processing image
+                                var _image = UIImage(named: "DefaultProduct")!
+//                                let base64String = image as! String
+//                                let decodedData = NSData(base64Encoded: base64String, options: [])
+//                                if let __image = decodedData{
+//                                    _image = UIImage(data: __image as Data)!
+//                                }
+                                
+                                result.append(ProductModel(
+                                    id: id as! Int,
+                                    image: _image,
+                                    name: name as! String,
+                                    price: price as! Int,
+                                    quantity: quantity as! Int,
+                                    type: type as! String,
+                                    unit: unit as! String,
+                                    isActice: isActive as! Int == 1
+                                ))
+                                
+                                
+                            }
+                        }
+                    }
+                    //                    print(value["data"]!)
+                    
+                    //                    if let isSuccess = value["isSuccess"]{
+                    //                        result = isSuccess as? Int == 1
+                    //                    }
+                } catch {
+                    print("error when get list product")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // Change Product status
+    func CallApiChangeProductStatus(
+        token:String,
+        id:Int
+    )->Bool {
+        let Url = String(format: self.urlBackEnd + "/api/product/change-active-status")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service change product status not found")
+            return false
+        }
+        
+        let parameters: [String: Any] = [
+            "id": id
+        ]
+        
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "POST"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {
+            return false
+        }
+        request.httpBody = httpBody
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        var result = false
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    if let isSuccess = value["isSuccess"]{
+                        result = isSuccess as? Int == 1
+                    }
+                } catch {
+                    print("error when change product status")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // Create Product
+    func CallApiCreateProduct(
+        token:String,
+        name:String,
+        price:Int,
+        quantity:Int,
+        type:String,
+        unit:String,
+        image:UIImage
+    )->Bool {
+        
+        let Url = String(format: self.urlBackEnd + "/api/product/create")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service create product not found")
+            return false
+        }
+//        var stringImage = ""
+//        // processing image
+//        if let imagePNGData = image.pngData() as NSData?{
+//            stringImage = imagePNGData.base64EncodedString(options: .lineLength64Characters)
+//        }
+        
+        
+        let parameters: [String: Any] = [
+            "name": name,
+            "price":price,
+            "quantity":quantity,
+            "type":type,
+            "unit":unit
+        ]
+        
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "POST"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        
+        request.setValue("*/*", forHTTPHeaderField: "Accept")
+        request.setValue("gzip,deflate,br", forHTTPHeaderField: "Accept-Encoding")
+        request.setValue("keep-alive", forHTTPHeaderField: "Connection")
+        
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {
+            return false
+        }
+        request.httpBody = httpBody
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        var result = false
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    print(json)
+                    if let isSuccess = value["isSuccess"]{
+                        result = isSuccess as? Int == 1
+                    }
+                } catch {
+                    print("error when create product")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // Update Product
+    func CallApiUpdateProduct(
+        token:String,
+        id:Int,
+        name:String,
+        price:Int,
+        quantity:Int,
+        type:String,
+        unit:String,
+        image:UIImage
+    )->Bool {
+        
+        let Url = String(format: self.urlBackEnd + "/api/product/update")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service update product not found")
+            return false
+        }
+//        var stringImage = ""
+//        // processing image
+//        if let imagePNGData = image.pngData() as NSData?{
+//            stringImage = imagePNGData.base64EncodedString(options: .lineLength64Characters)
+//        }
+        
+        
+        let parameters: [String: Any] = [
+            "id":id,
+            "name": name,
+            "price":price,
+            "quantity":quantity,
+            "type":type,
+            "unit":unit
+        ]
+        
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        request.setValue("*/*", forHTTPHeaderField: "Accept")
+        request.setValue("gzip,deflate,br", forHTTPHeaderField: "Accept-Encoding")
+        request.setValue("keep-alive", forHTTPHeaderField: "Connection")
+        
+        
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {
+            return false
+        }
+        request.httpBody = httpBody
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        var result = false
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    print(json)
+                    if let isSuccess = value["isSuccess"]{
+                        result = isSuccess as? Int == 1
+                    }
+                } catch {
+                    print("error when update product")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // Get user list
+    func CallApiGetUserList(
+        token:String,
+        keyword:String
+    )->[UserModel] {
+        let Url = String(format: self.urlBackEnd + "/api/user/list-user?keyword=\(keyword)")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service get list user not found")
+            return []
+        }
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "GET"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        var result:[UserModel] = []
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    if let _data = value["data"]{
+                        for item in _data as! [Dictionary<String,Any>]{
+                            if let id = item["id"],
+                               let name = item["name"],
+                               let email = item["email"],
+                               let phone = item["phone"],
+                               let type = item["rule"],
+                               let is_confirm = item["is_confirm"],
+                               let is_active = item["is_active"]{
+                                result.append(UserModel(
+                                    id: id as! Int,
+                                    name: name as! String,
+                                    email: email as! String,
+                                    phone: phone as! String,
+                                    type: type as! String,
+                                    isConfirm:is_confirm as! Int == 1,
+                                    isActive: is_active as! Int == 1
+                                ))
+                            }
+                        }
+                    }
+                    //                    print(value["data"]!)
+                    
+                    //                    if let isSuccess = value["isSuccess"]{
+                    //                        result = isSuccess as? Int == 1
+                    //                    }
+                } catch {
+                    print("error when get list user")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // Change User status
+    func CallApiChangeUserStatus(
+        token:String,
+        id:Int
+    )->Bool {
+        let Url = String(format: self.urlBackEnd + "/api/user/change-active-status")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service change user status not found")
+            return false
+        }
+        
+        let parameters: [String: Any] = [
+            "user_id": id
+        ]
+        
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "POST"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {
+            return false
+        }
+        request.httpBody = httpBody
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        let session = URLSession.shared
+        var result = false
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    if let isSuccess = value["isSuccess"]{
+                        result = isSuccess as? Int == 1
+                    }
+                } catch {
+                    print("error when change user status")
+                }
+                semaphore.signal()
+            }
+        }.resume()
+        semaphore.wait()  //2. wait for finished counting
+        return result
+    }
+    
+    // create user
+    func CallApiCreateUser(
+        token:String,
+        name:String,
+        phone:String,
+        email:String,
+        password:String,
+        confirm_password:String,
+        type_id:Int
+    )->Bool {
+        let Url = String(format: self.urlBackEnd + "/api/user/register")
+        guard let serviceUrl = URL(string: Url) else {
+            print("Service create user not found")
+            return false
+        }
+        let param: [String: Any] = [
+            "name": name,
+            "phone" : phone,
+            "email" : email,
+            "password" : password,
+            "confirm_password" : confirm_password,
+            "type_id":type_id
+        ]
+        var request = URLRequest(url: serviceUrl)
+        request.httpMethod = "POST"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: param, options: []) else {
+            print("Some thing wrong when create user.")
+            return false
+        }
+        request.httpBody = httpBody
+        request.timeoutInterval = 20
+        let semaphore = DispatchSemaphore(value: 0)
+        var result = false
+        let session = URLSession.shared
+        session.dataTask(with: request) { (data, response, error) in
+            //            if let response = response {
+            //                print("response: ",response)
+            //            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    let value = json as! Dictionary<String, AnyObject>
+                    if let isSuccess = value["isSuccess"]{
+                        result = isSuccess as? Int == 1
+                    }
+                } catch {
+                    print("Some thing wrong when create user.")
                 }
                 semaphore.signal()
             }

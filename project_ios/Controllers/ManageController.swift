@@ -1,16 +1,17 @@
 //
-//  MainController.swift
+//  ManageController.swift
 //  Et O Et Coffee Manager
 //
-//  Created by Cao Trung Hieu on 06/05/2022.
+//  Created by Tran Huu Phuc on 25/05/2022.
 //
 
 import UIKit
 
-class MainController: UIViewController {
+class ManageController: UIViewController {
+
     // MARK: Properties
     @IBOutlet weak var lblUserName: UILabel!
-    @IBOutlet weak var btnManage: UIButton!
+    @IBOutlet weak var btnUsers: UIButton!
     @IBOutlet weak var lblUserType: UILabel!
     
     
@@ -28,7 +29,7 @@ class MainController: UIViewController {
         type: "",
         isConfirm: false,
         isActive: false)
-
+    
     
     // MARK: Method
     override func viewDidLoad() {
@@ -39,8 +40,8 @@ class MainController: UIViewController {
             if userInfo.id > 0{
                 self.lblUserName.text = userInfo.name
                 self.lblUserType.text = userInfo.type
-                if userInfo.type == "Staff"{
-                    self.btnManage.isHidden = true
+                if userInfo.type == "Staff" || userInfo.type == "Manager"{
+                    self.btnUsers.isHidden = true
                 }
             }else{
                 self.logOut()
@@ -48,24 +49,22 @@ class MainController: UIViewController {
         }
     }
     
-    
-    @IBAction func logOut(_ sender: Any) {
-        self.logOut()
+    @IBAction func backToMenuOption(_ sender: Any) {
+        self.token = ""
+        self.navigationController?.popViewController(animated: true)
     }
+    
     
     // Kiểm tra màn hình chuẩn bị chuyển
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // screen profile
-        if let profileController = segue.destination as? ProfileController {
-            profileController.token = self.token
+        // user manage screen
+        if let userManageController = segue.destination as? UserManageController {
+            userManageController.token = self.token
         }
-        // screen shop
-        else if let shopController = segue.destination as? ShopController {
-            shopController.token = self.token
-        }
-        // screen manage
-        else if let manageController = segue.destination as? ManageController {
-            manageController.token = self.token
+        
+        // product manage screen
+        if let productManageController = segue.destination as? ProductManageController {
+            productManageController.token = self.token
         }
     }
     
@@ -75,8 +74,8 @@ class MainController: UIViewController {
             if userInfo.id > 0{
                 self.lblUserName.text = userInfo.name
                 self.lblUserType.text = userInfo.type
-                if userInfo.type == "Staff"{
-                    self.btnManage.isHidden = true
+                if userInfo.type == "Staff" || userInfo.type == "Manager"{
+                    self.btnUsers.isHidden = true
                 }
             }else{
                 self.logOut()
